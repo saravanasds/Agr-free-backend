@@ -17,12 +17,30 @@ const userRegister = async (req, res) => {
       address,
     } = req.body;
 
-    const aldreadyAadharExist = await User.findOne({adhaarNumber});
+      const aldreadyAadharExist = await User.findOne({ adhaarNumber });
 
-    if(aldreadyAadharExist){
+    if (aldreadyAadharExist) {
       return res
         .status(400)
         .json({ message: "Aadhaar number is already registered" });
+    }
+
+    if (
+      !name ||
+      !fatherName ||
+      !dob ||
+      !gender ||
+      !email ||
+      !mobileNumber ||
+      !adhaarNumber ||
+      !voterId ||
+      !district ||
+      !constituency ||
+      !address
+    ) {
+      return res
+        .status(400)
+        .json({ message: "All fields are required" });
     }
 
     const allUsers = await User.find({});
