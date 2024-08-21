@@ -17,7 +17,8 @@ const userRegister = async (req, res) => {
       address,
     } = req.body;
 
-      const aldreadyAadharExist = await User.findOne({ adhaarNumber });
+    // Check if Aadhaar number already exists
+    const aldreadyAadharExist = await User.findOne({ adhaarNumber });
 
     if (aldreadyAadharExist) {
       return res
@@ -25,12 +26,12 @@ const userRegister = async (req, res) => {
         .json({ message: "Aadhaar number is already registered" });
     }
 
+    // Check if all required fields are provided
     if (
       !name ||
       !fatherName ||
       !dob ||
       !gender ||
-      !email ||
       !mobileNumber ||
       !adhaarNumber ||
       !voterId ||
@@ -38,21 +39,19 @@ const userRegister = async (req, res) => {
       !constituency ||
       !address
     ) {
-      return res
-        .status(400)
-        .json({ message: "All fields are required" });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
     const allUsers = await User.find({});
 
-
-
+    // Generate a unique referral ID for the new user
     const referralId = await uniqId();
 
+    // Use the mobile number for referral logic
     let referredBy = req.body.referredBy;
 
     const referralUser = await User.findOne({
-      referralId: req.body.referredBy,
+      mobileNumber: req.body.referredBy,  // Change this to mobileNumber
     });
 
     if (!referralUser) {
@@ -76,12 +75,10 @@ const userRegister = async (req, res) => {
       referredBy,
     });
 
-    // console.log(newUser);
-
+    // Update the referred user's referredPeoples array
     for (const singleUser of allUsers) {
-      if (singleUser.referralId === referredBy) {
+      if (singleUser.mobileNumber === referredBy) {  // Change this to mobileNumber
         singleUser.referredPeoples.push(referralId);
-
         await singleUser.save();
       }
     }
@@ -97,6 +94,7 @@ const userRegister = async (req, res) => {
     }
   }
 };
+
 
 const getAllUsers = async (req, res) => {
   try {
